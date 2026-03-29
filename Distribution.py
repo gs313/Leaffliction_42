@@ -15,7 +15,6 @@ def main():
 
     class_counts = {}
 
-    # วนแต่ละ class
     for class_name in os.listdir(base_dir):
         class_path = os.path.join(base_dir, class_name)
 
@@ -31,13 +30,12 @@ def main():
     if not class_counts:
         print("No data found")
         return
-
+    class_counts = dict(sorted(class_counts.items(), key=lambda x: x[1], reverse=True))
     labels = list(class_counts.keys())
     values = list(class_counts.values())
 
     dataset_name = os.path.basename(base_dir)
 
-    # 📊 Bar chart
     plt.figure()
     plt.bar(labels, values)
     plt.title(f"{dataset_name} Dataset Distribution (Bar Chart)")
@@ -45,7 +43,6 @@ def main():
     plt.tight_layout()
     plt.show()
 
-    # 🥧 Pie chart
     plt.figure()
     plt.pie(values, labels=labels, autopct='%1.1f%%')
     plt.title(f"{dataset_name} Dataset Distribution (Pie Chart)")
