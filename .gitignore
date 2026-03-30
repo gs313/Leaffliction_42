@@ -1,3 +1,6 @@
 
 leaves/*
 leaves_venv/*
+images/
+venv/
+*.pth
