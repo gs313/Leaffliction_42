@@ -1,9 +1,14 @@
 import os
 import torch
+from PIL import Image
+import cv2
+import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader, random_split
+from torchvision.models import resnet18, ResNet18_Weights
+
 
 # ======================
 # CONFIG
@@ -17,9 +22,44 @@ MODEL_PATH = "model.pth"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ======================
-# TRANSFORMS
+# PART 3 FUNCTIONS
 # ======================
+
+def apply_mask(img):
+    """Remove background using simple threshold"""
+    img_np = np.array(img)
+    gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
+
+    # Otsu threshold (better than fixed threshold)
+    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    mask = cv2.bitwise_and(img_np, img_np, mask=thresh)
+    return Image.fromarray(mask)
+
+
+def enhance_contrast(img):
+    """Improve contrast using CLAHE"""
+    img_np = np.array(img)
+    lab = cv2.cvtColor(img_np, cv2.COLOR_RGB2LAB)
+
+    l, a, b = cv2.split(lab)
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l)
+
+    merged = cv2.merge((cl, a, b))
+    enhanced = cv2.cvtColor(merged, cv2.COLOR_LAB2RGB)
+
+    return Image.fromarray(enhanced)
+
+
+# ======================
+# TRANSFORM PIPELINE
+# ======================
+
 transform = transforms.Compose([
+    transforms.Lambda(lambda img: apply_mask(img)),       # Part 3: segmentation
+    transforms.Lambda(lambda img: enhance_contrast(img)), # Part 3: feature boost
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize([0.5]*3, [0.5]*3)
