@@ -3,6 +3,7 @@ import os
 from PIL import Image, ImageOps, ImageEnhance
 import random
 
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python Augmentation.py <image_path>")
@@ -15,7 +16,8 @@ def main():
         return
     dataset_root = os.path.dirname(os.path.dirname(img_path))
     relative_path = os.path.relpath(img_path, dataset_root)
-    new_path = os.path.join("augmented_directory", os.path.basename(dataset_root), relative_path)
+    new_path = os.path.join("augmented_directory",
+                            os.path.basename(dataset_root), relative_path)
     print(f"Augmented images will be saved to: {new_path}")
     os.makedirs(os.path.dirname(new_path), exist_ok=True)
     base_name, ext = os.path.splitext(new_path)
@@ -39,7 +41,6 @@ def main():
     contrast = enhancer.enhance(factor)
     contrast.save(f"{base_name}_Contrast{ext}")
 
-    
     # Illumination (Brightness)
     enhancer = ImageEnhance.Brightness(img)
     illum = enhancer.enhance(1.5)
@@ -50,19 +51,20 @@ def main():
         matrix = []
         for p1, p2 in zip(pa, pb):
             matrix.append([p1[0], p1[1], 1, 0, 0, 0,
-                        -p2[0]*p1[0], -p2[0]*p1[1]])
+                           -p2[0]*p1[0], -p2[0]*p1[1]])
             matrix.append([0, 0, 0, p1[0], p1[1], 1,
-                        -p2[1]*p1[0], -p2[1]*p1[1]])
+                           -p2[1]*p1[0], -p2[1]*p1[1]])
 
         A = matrix
         B = [p for point in pb for p in point]
 
-        res = list(map(float, __import__('numpy').linalg.lstsq(A, B, rcond=None)[0]))
+        res = list(map(float,
+                       __import__('numpy').linalg.lstsq(A, B, rcond=None)[0]))
         return res
 
     width, height = img.size
 
-    src = [(0,0), (width,0), (width,height), (0,height)]
+    src = [(0, 0), (width, 0), (width, height), (0, height)]
 
     dst = [
         (random.randint(0, 20), random.randint(0, 20)),
@@ -93,6 +95,7 @@ def main():
             distorted.putpixel((i, j), pixels[ni, nj])
 
     distorted.save(f"{base_name}_Distortion{ext}")
+
 
 if __name__ == "__main__":
     main()

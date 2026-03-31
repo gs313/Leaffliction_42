@@ -2,6 +2,7 @@ import os
 import sys
 import matplotlib.pyplot as plt
 
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python Distribution.py <directory>")
@@ -30,7 +31,8 @@ def main():
     if not class_counts:
         print("No data found")
         return
-    class_counts = dict(sorted(class_counts.items(), key=lambda x: x[1], reverse=True))
+    class_counts = dict(sorted(class_counts.items(),
+                               key=lambda x: x[1], reverse=True))
     labels = list(class_counts.keys())
     values = list(class_counts.values())
 
@@ -47,6 +49,7 @@ def main():
     plt.pie(values, labels=labels, autopct='%1.1f%%')
     plt.title(f"{dataset_name} Dataset Distribution (Pie Chart)")
     plt.show()
+
 
 if __name__ == "__main__":
     main()
