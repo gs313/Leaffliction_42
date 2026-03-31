@@ -25,20 +25,42 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # PART 3 FUNCTIONS
 # ======================
 
-def apply_mask(img):
-    """Remove background using simple threshold"""
+from plantcv import plantcv as pcv
+
+def apply_mask_pcv(img):
+    # Convert PIL → numpy
     img_np = np.array(img)
-    gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
 
-    # Otsu threshold (better than fixed threshold)
-    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # Step 1: Convert to HSV
+    hsv = cv2.cvtColor(img_np, cv2.COLOR_RGB2HSV)
 
-    mask = cv2.bitwise_and(img_np, img_np, mask=thresh)
-    return Image.fromarray(mask)
+    # Step 2: Create mask (green detection)
+    lower = np.array([25, 40, 40])
+    upper = np.array([95, 255, 255])
+    mask = cv2.inRange(hsv, lower, upper)
+
+    # Step 3: Define ROI (center region)
+    h, w = mask.shape
+    roi = pcv.roi.rectangle(
+        img=mask,
+        x=int(w * 0.1),
+        y=int(h * 0.1),
+        h=int(h * 0.8),
+        w=int(w * 0.8)
+    )
+
+    # Step 4: Apply ROI filter (YOUR LINE)
+    filtered_mask = pcv.roi.filter(mask=mask, roi=roi, roi_type='partial')
+
+    # Step 5: Apply mask to image
+    result = cv2.bitwise_and(img_np, img_np, mask=filtered_mask)
+
+    return Image.fromarray(result)
+
+
 
 
 def enhance_contrast(img):
-    """Improve contrast using CLAHE"""
     img_np = np.array(img)
     lab = cv2.cvtColor(img_np, cv2.COLOR_RGB2LAB)
 
@@ -54,12 +76,12 @@ def enhance_contrast(img):
 
 
 # ======================
-# TRANSFORM PIPELINE
+# TRANSFORM (IDENTICAL TO TRAIN)
 # ======================
 
 transform = transforms.Compose([
-    transforms.Lambda(lambda img: apply_mask(img)),       # Part 3: segmentation
-    transforms.Lambda(lambda img: enhance_contrast(img)), # Part 3: feature boost
+    transforms.Lambda(lambda img: apply_mask_pcv(img)),
+    transforms.Lambda(lambda img: enhance_contrast(img)),
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize([0.5]*3, [0.5]*3)
