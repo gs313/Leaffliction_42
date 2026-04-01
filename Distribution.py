@@ -3,13 +3,8 @@ import sys
 import matplotlib.pyplot as plt
 
 
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: python Distribution.py <directory>")
-        return
-
-    base_dir = sys.argv[1]
-
+def distribution(base_dir=None, show=True):
+    
     if not os.path.isdir(base_dir):
         print("Invalid directory")
         return
@@ -33,6 +28,14 @@ def main():
         return
     class_counts = dict(sorted(class_counts.items(),
                                key=lambda x: x[1], reverse=True))
+    if show:
+        plot_distribution(class_counts, base_dir)
+    print(f"Dataset: {os.path.basename(base_dir)}")
+    print(class_counts)
+    return class_counts
+    
+def plot_distribution(class_counts, base_dir):
+
     labels = list(class_counts.keys())
     values = list(class_counts.values())
 
@@ -52,4 +55,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python Distribution.py <directory>")
+        sys.exit(1)
+    base_dir = sys.argv[1]
+    distribution(base_dir)

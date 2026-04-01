@@ -1,4 +1,3 @@
-import os
 import torch
 from PIL import Image
 import cv2
@@ -7,13 +6,14 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader, random_split
-from torchvision.models import resnet18, ResNet18_Weights
+from torchvision.models import ResNet18_Weights
+from plantcv import plantcv as pcv
 
 
 # ======================
 # CONFIG
 # ======================
-DATA_DIR = "images"   # change if needed
+DATA_DIR = "balanced"   # change if needed
 BATCH_SIZE = 32
 EPOCHS = 10
 LR = 0.001
@@ -25,7 +25,6 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # PART 3 FUNCTIONS
 # ======================
 
-from plantcv import plantcv as pcv
 
 def apply_mask_pcv(img):
     # Convert PIL → numpy
@@ -56,8 +55,6 @@ def apply_mask_pcv(img):
     result = cv2.bitwise_and(img_np, img_np, mask=filtered_mask)
 
     return Image.fromarray(result)
-
-
 
 
 def enhance_contrast(img):
