@@ -4,3 +4,5 @@ leaves_venv/*
 images/
 venv/
 *.pth
+balanced/
+__pycache__/
